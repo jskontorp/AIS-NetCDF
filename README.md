@@ -1,7 +1,7 @@
 # AIS-NetCDF
 A guide to merging AIS data with NetCDF data in R.
 
-The metorological data can be downloaded from [Copernicus](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form) to NetCDF format in an `.nc` file, either via filling out the form, or using the API (see [this page](https://cds.climate.copernicus.eu/api-how-to)). The following script in R shows how to merge AIS data with the met. data:
+The metorological data can be downloaded from [Copernicus](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form) to NetCDF format in an `.nc` file, either via filling out the form, or using the API (see [this page](https://cds.climate.copernicus.eu/api-how-to)). The following script in R shows how to merge AIS data with the met. data.
 
 ```
 library(vroom)
@@ -9,9 +9,9 @@ library(dplyr)
 library(lubridate)
 library(ncdf4)
 ```
-Load the AIS data, as done with a small sample below:
+Load the AIS data, as done with a small sample below (see attached file). If you have lots of observations (millions+), [vroom](https://github.com/r-lib/vroom ) is recommended as it works much faster than read.csv()
 ```
-ais_sample <- vroom("ais_sample.csv") # if you have lots of observations (millions+), vroom is recommended as it works much faster than read.csv()
+ais_sample <- vroom("ais_sample.csv")
 ```
 
 The AIS data is prepared for merging with met. data:
@@ -40,7 +40,6 @@ ncfile
 The dimensions are extracted:
 
 ```
-
 # space
 lat <-  ncvar_get(ncfile, "latitude") # retrieves latitudes in NetCDF file
 lon <-  ncvar_get(ncfile, "longitude") # retrieves longitudes in NetCDF file
@@ -57,7 +56,7 @@ time_df <- data.frame(TIME = as.POSIXct(time)) # in order for inner_join (below 
 ais_df <- (inner_join(ais_dplyr, time_df, by = "TIME")) # keeps only rows with both AIS and weather data
 ```
 
-As the met. data variables are extraxted from the `.nc` file based on the indices, a few functions are made to match latitudes, longitudes and timestamps with the right indices in the `.nc` file:
+As the met. data variables are extraxted from the `.nc` file based on the indices (try printing the lat or lon variable to see the full vector wich is refrenced by index), a few functions are made to match latitudes, longitudes and timestamps with the right indices in the `.nc` file:
 ```
 get_lon <- function(LON){
   LON = LON[[1]] # retreives value from data table
@@ -99,7 +98,7 @@ ncvar_get(ncfile,
            count = c(1,1,1))
 ```
 
-The `ncdf4::ncvar_get()` function can be used along with the indexing functions and the `dplyr::mutate()` function to retrieve met. data for all columns in a prepared AIS data set. This works pretty fast on much larger AIS data sets as well (100 000+ lines)
+The [`ncdf4::ncvar_get()`](https://www.rdocumentation.org/packages/ncdf4/versions/1.16.1/topics/ncvar_get) function can be used along with the indexing functions and the `dplyr::mutate()` function to retrieve met. data for all columns in a prepared AIS data set. This works pretty fast on much larger AIS data sets as well (100 000+ lines)
 ```
 ais_dplyr_res <- ais_df %>% 
   rowwise() %>% # in order to retreive the met. variables by row

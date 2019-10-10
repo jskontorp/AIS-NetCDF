@@ -92,10 +92,10 @@ get_time <- function(TIME){ # same here. No rounding
 # this retrieves single met. variable for one observation
 ncvar_get(ncfile,
           "swh", # the met. variable, arbitrarily chosen
-          start = c(get_lon(ais_df[1,4]),
-                    get_lat(ais_df[1,3]),
-                     get_time(ais_df[1,2])), 
-           count = c(1,1,1))
+          start = c(get_lon(ais_df[1,4]), # start of longitude index
+                    get_lat(ais_df[1,3]), # start of latitude index
+                     get_time(ais_df[1,2])), # start of time index
+           count = c(1,1,1)) # number of values from first indexed to retrieve, here a single value
 ```
 
 The [`ncdf4::ncvar_get()`](https://www.rdocumentation.org/packages/ncdf4/versions/1.16.1/topics/ncvar_get) function can be used along with the indexing functions and the `dplyr::mutate()` function to retrieve met. data for all columns in a prepared AIS data set. This works pretty fast on much larger AIS data sets as well (100 000+ lines)

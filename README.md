@@ -1,7 +1,7 @@
 # AIS-NetCDF
 A guide to merging AIS data with NetCDF data in R.
 
-The metorological data in NetCDF format can be downloaded from [Copernicus](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form) to a NetCDF of `.nc` file, either via filling out the form, or using the API (see [this page](https://cds.climate.copernicus.eu/api-how-to)). The following script in R shows how to merge AIS data with the met. data:
+The metorological data can be downloaded from [Copernicus](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form) to NetCDF format in an `.nc` file, either via filling out the form, or using the API (see [this page](https://cds.climate.copernicus.eu/api-how-to)). The following script in R shows how to merge AIS data with the met. data:
 
 ```
 library(vroom)

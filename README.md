@@ -1,7 +1,7 @@
 # AIS-NetCDF
 A guide to merging AIS data with NetCDF data in R.
 
-Firstly the metorological data can be downloaded from [Copernicus](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form), either via filling out the form, or using the API (see [this page](https://cds.climate.copernicus.eu/api-how-to)).
+The metorological data can be downloaded from [Copernicus](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form) to a NetCDF of ´.nc´ file, either via filling out the form, or using the API (see [this page](https://cds.climate.copernicus.eu/api-how-to)). The following script in R shows how to merge AIS data with the met. data:
 
 ```
 library(vroom)
@@ -26,7 +26,7 @@ ais_dplyr <- ais_sample %>%
   complete(TIME = seq.POSIXt(from = as.POSIXct(min(TIME)), 
                              to = as.POSIXct(max(TIME)), 
                              by="hour")) %>%  # creates rows for hours with lack of AIS reports (in order to match with met. data)
-  fill(LATITUDE, LONGITUDE) %>% # fills in missing LON and LAT from the neighbouring row (upwards). Sould look for interpolation alternatives
+  fill(LATITUDE, LONGITUDE) %>% # fills in missing LON and LAT from the neighbouring row (upwards). One should look for better alternatives with interpolation
   ungroup()
 ```
 
@@ -57,12 +57,12 @@ time_df <- data.frame(TIME = as.POSIXct(time)) # in order for inner_join (below 
 ais_df <- (inner_join(ais_dplyr, time_df, by = "TIME")) # keeps only rows with both AIS and weather data
 ```
 
-As the met. data variables are extraxted from the `.nc` file based on the indices, a few functions is made to match latitudes, longitudes and timestamps with the right indices in the `.nc` file:
+As the met. data variables are extraxted from the `.nc` file based on the indices, a few functions are made to match latitudes, longitudes and timestamps with the right indices in the `.nc` file:
 ```
 get_lon <- function(LON){
   LON = LON[[1]] # retreives value from data table
   
-  ais_lon = round(LON / 0.5) * 0.5 # rounds to match the met. data grid of .25 degrees
+  ais_lon = round(LON / 0.5) * 0.5 # rounds to match the met. data grid of .5 degrees
   
   ais_lon <- ifelse(ais_lon == 360, 0, ais_lon) # 360 degrees is the same as 0 degrees (greenwich) in the NetCDF files. Only 0 degrees is used, not 360)
   
@@ -99,7 +99,7 @@ ncvar_get(ncfile,
            count = c(1,1,1))
 ```
 
-The `ncvar_get()` function can be used along with the indexing functions and the `dplyr::mutate()` function to retrieve met. data for all columns in a prepared AIS data set. This works pretty fast on much larger AIS data sets as well (100 000+ lines)
+The `ncdf4::ncvar_get()` function can be used along with the indexing functions and the `dplyr::mutate()` function to retrieve met. data for all columns in a prepared AIS data set. This works pretty fast on much larger AIS data sets as well (100 000+ lines)
 ```
 ais_dplyr_res <- ais_df %>% 
   rowwise() %>% # in order to retreive the met. variables by row
